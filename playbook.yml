@@ -1,0 +1,41 @@
+---
+- hosts: semua
+  vars:
+          - image: ipasya17/tlkm_apache
+  tasks:
+          - name: install python docker centos
+            yum:
+              name: "{{ item }}"
+              state: present
+            loop:
+              - epel-release
+              - python3
+              - python3-docker           
+            when: ansible_facts['os_family'] == "RedHat"
+
+          - name: install python docker ubuntu
+            apt:
+             name: "{{ item }}"
+             state: present
+            loop:
+              - python3
+              - python3-docker
+            when: ansible_facts['os_family'] == "Debian"
+
+          - name: pull image
+            docker_image:
+              name: "{{ image }}"
+              state: present
+              force: yes
+        
+
+          - name: run container
+            docker_container:
+              name: tlkm-web
+              image: "{{ image }}"
+              state: started
+              published_ports:
+                - 2021:80
+              recreate: yes
+        
+...
